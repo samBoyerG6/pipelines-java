@@ -6,8 +6,26 @@
 trigger:
 - main
 
+strategy:
+  matrix:
+    linux:
+      imageName: "ubuntu-latest"
+    mac:
+      imageName: "macOS-latest"
+    windows:
+      imageName: "windows-latest"
+  maxParallel: 3
+
 pool:
-  vmImage: windows-latest
+  vmImage: $(imageName)
+
+#strategy:
+#  matrix:
+#    jdk10:
+#      jdkVersion: "1.10"
+#    jdk11:
+#      jdkVersion: "1.11"
+#  maxParallel: 2
 
 steps:
 - task: Maven@3
@@ -20,3 +38,10 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
+
+- task: PublishCodeCoverageResults@1
+  inputs:
+    codeCoverageTool: "JaCoCo"
+    summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/site/jacoco/jacoco.xml"
+    reportDirectory: "$(System.DefaultWorkingDirectory)/**/site/jacoco"
+    failIfCoverageEmpty: true
